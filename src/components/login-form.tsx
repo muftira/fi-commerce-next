@@ -1,4 +1,7 @@
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/router"
+
+// Components
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -14,6 +17,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const router = useRouter()
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -80,7 +84,7 @@ export function LoginForm({
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{" "}
-                <a href="#" className="underline underline-offset-4">
+                <a onClick={() => router.push('/signup')} className="underline underline-offset-4 cursor-pointer">
                   Sign up
                 </a>
               </div>
