@@ -12,7 +12,7 @@ export default function SignUpPage() {
           </div>
           Acme Inc.
         </a>
-        <div className="flex w-full max-w-sm flex-col gap-6">
+        <div className="flex w-full max-w-sm items-center justify-center flex-col gap-6">
           <SignUpForm />
         </div>
       </div>
