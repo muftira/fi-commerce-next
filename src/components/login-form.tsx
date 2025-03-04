@@ -27,7 +27,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     delete loginData.status;
-    const response = await fetchData('POST', '/userlogin', loginData);
+    const response = await fetchData('POST', 'v1/userlogin', loginData);
     if (response.success) {
       localStorage.setItem(
         'fiCommerce',
