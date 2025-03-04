@@ -1,9 +1,14 @@
+import React from 'react'
+
+// componets
 import { Button } from "@/components/ui/button"
+import Marketplace from '@/components/marketplace'
+
 
 export default function Home() {
   return (
-    <div className="w-full h-screen flex items-center justify-center">
-      <Button>Click me</Button>
-    </div>
+    <>
+    <Marketplace />
+    </>
   )
 }

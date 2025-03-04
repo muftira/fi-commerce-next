@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useRouter } from 'next/router';
+import { fetchData } from '@/utils/fetch';
 
 // Components
 import { Button } from '@/components/ui/button';
@@ -9,11 +10,39 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 // icons
-import { BiShowAlt, BiSolidHide } from "react-icons/bi";
+import { BiShowAlt, BiSolidHide } from 'react-icons/bi';
+
+/// types
+import { Login } from '@/types';
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
   const router = useRouter();
   const [hidePassword, setHidePassword] = useState<boolean>(false);
+  const [loginData, setLoginData] = useState<Login>({
+    status: true,
+    email: '',
+    password: '',
+  });
+
+  const handleLogin = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    delete loginData.status;
+    const response = await fetchData('POST', '/userlogin', loginData);
+    if (response.success) {
+      localStorage.setItem(
+        'fiCommerce',
+        JSON.stringify({
+          user: response.data?.data.data.id,
+          name: response.data?.data.data.fullName,
+          role: response.data?.data.data.Role,
+          token: response.data?.data.token,
+        })
+      );
+      router.push(response.data?.data.data.Role.roleName === 'admin' ? '/dashboard' : '/');
+    } else {
+      setLoginData({ ...loginData, status: false });
+    }
+  };
   return (
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card>
@@ -55,7 +84,15 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               <div className="grid gap-6">
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="m@example.com" required />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="m@example.com"
+                    onChange={(e) =>
+                      setLoginData({ ...loginData, email: e.target.value, status: true })
+                    }
+                    required
+                  />
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
@@ -64,8 +101,16 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                       Forgot your password?
                     </a>
                   </div>
-                  <div className='relative'>
-                  <Input id="password" type={hidePassword ? 'text' : 'password'} placeholder="password" required />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={hidePassword ? 'text' : 'password'}
+                      placeholder="password"
+                      onChange={(e) =>
+                        setLoginData({ ...loginData, password: e.target.value, status: true })
+                      }
+                      required
+                    />
                     {!hidePassword ? (
                       <BiShowAlt
                         className="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer"
@@ -79,9 +124,16 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
                     )}
                   </div>
                 </div>
-                <Button type="submit" className="w-full">
-                  Login
-                </Button>
+                <div className="w-full flex flex-col items-center space-y-2">
+                  <Button type="submit" className="w-full" onClick={(e) => handleLogin(e)}>
+                    Login
+                  </Button>
+                  {!loginData.status && (
+                    <Label htmlFor="Wrong Credential" className="text-red-600">
+                      Wrong Credentials!
+                    </Label>
+                  )}
+                </div>
               </div>
               <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
