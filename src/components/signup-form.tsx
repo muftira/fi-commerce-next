@@ -23,6 +23,7 @@ export function SignUpForm() {
     confirmPassword: '',
     address: '',
     phoneNumber: '',
+    roleName: 'customer'
   });
 
   const [hidePassword, setHidePassword] = useState<PasswordHide>({

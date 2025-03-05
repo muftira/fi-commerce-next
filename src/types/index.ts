@@ -17,6 +17,7 @@ export type Signup = {
   confirmPassword?: string,
   address: string,
   phoneNumber: string,
+  roleName: string,
 }
 
 export type Header = {
