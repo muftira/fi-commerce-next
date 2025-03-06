@@ -48,17 +48,24 @@ export function SignUpForm() {
   const handleCheckEmail = async () => {
     const response = await fetchData('GET', `v1/useremail?email=${data.email}`);
     if (response.success) {
-      setCheckEmail(true)
-    }else{
-      setCheckEmail(false)
+      setCheckEmail(true);
+    } else {
+      setCheckEmail(false);
     }
     console.log('response==>', response.data?.data);
     console.log('email==>', data.email);
-    
   };
 
   const validationData = () => {
-    if (data.fullName && data.email && data.password && data.address && data.phoneNumber && data.password === data.confirmPassword && checkEmail) {
+    if (
+      data.fullName &&
+      data.email &&
+      data.password &&
+      data.address &&
+      data.phoneNumber &&
+      data.password === data.confirmPassword &&
+      checkEmail
+    ) {
       return false;
     }
     return true;
@@ -69,7 +76,6 @@ export function SignUpForm() {
       handleCheckEmail();
     }
   }, [data.email]);
-
 
   return (
     <Card className="w-[700px] h-[640px]">
@@ -139,12 +145,8 @@ export function SignUpForm() {
                     ) : (
                       <IoCheckmarkOutline className="text-green-600 text-[14px] me-[2px] mb-[2px]" />
                     )}
-                    <p
-                      className={`text-[10px] text-${!checkEmail? 'red' : 'green'}-600`}
-                    >
-                      {!checkEmail
-                        ? 'Email is not availble.'
-                        : 'Email is availble.'}
+                    <p className={`text-[10px] text-${!checkEmail ? 'red' : 'green'}-600`}>
+                      {!checkEmail ? 'Email is not availble.' : 'Email is availble.'}
                     </p>
                   </div>
                 )}

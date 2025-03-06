@@ -10,15 +10,15 @@ export type Login = {
 };
 
 export type Signup = {
-  profilePicture: string,
-  fullName: string,
-  email: string,
-  password: string,
-  confirmPassword?: string,
-  address: string,
-  phoneNumber: string,
-  roleName: string,
-}
+  profilePicture: string;
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  address: string;
+  phoneNumber: string;
+  roleName: string;
+};
 
 export type Header = {
   'Content-Type': string;
