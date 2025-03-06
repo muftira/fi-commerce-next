@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { PasswordHide, Signup } from '@/types';
+import { useDebounce } from '@/utils/hooks';
 
 // components
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // icons
 import { BiShowAlt, BiSolidHide } from 'react-icons/bi';
+import { IoIosClose } from 'react-icons/io';
+import { IoCheckmarkOutline } from 'react-icons/io5';
+import { fetchData } from '@/utils/fetch';
 
 export function SignUpForm() {
   const router = useRouter();
@@ -23,7 +27,7 @@ export function SignUpForm() {
     confirmPassword: '',
     address: '',
     phoneNumber: '',
-    roleName: 'customer'
+    roleName: 'customer',
   });
 
   const [hidePassword, setHidePassword] = useState<PasswordHide>({
@@ -31,11 +35,41 @@ export function SignUpForm() {
     confirmPassword: false,
   });
 
+  const [checkEmail, setCheckEmail] = useState<boolean | string>('');
+
+  const debounce = useDebounce(data.email, 1000);
+
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     delete data.confirmPassword;
-    console.log('data==>', data);
+    // const response = await fetchData('POST', '/userregister', data);
   };
+
+  const handleCheckEmail = async () => {
+    const response = await fetchData('GET', `v1/useremail?email=${data.email}`);
+    if (response.success) {
+      setCheckEmail(true)
+    }else{
+      setCheckEmail(false)
+    }
+    console.log('response==>', response.data?.data);
+    console.log('email==>', data.email);
+    
+  };
+
+  const validationData = () => {
+    if (data.fullName && data.email && data.password && data.address && data.phoneNumber && data.password === data.confirmPassword && checkEmail) {
+      return false;
+    }
+    return true;
+  };
+
+  useEffect(() => {
+    if (data.email) {
+      handleCheckEmail();
+    }
+  }, [data.email]);
+
 
   return (
     <Card className="w-[700px] h-[640px]">
@@ -96,7 +130,26 @@ export function SignUpForm() {
               />
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="email">Email</Label>
+              <div className="flex space-x-2 relative">
+                <Label htmlFor="email">Email</Label>
+                {debounce && (
+                  <div className="flex absolute left-8 top-1/2 -translate-y-1/2">
+                    {!checkEmail ? (
+                      <IoIosClose className="text-red-600" />
+                    ) : (
+                      <IoCheckmarkOutline className="text-green-600 text-[14px] me-[2px] mb-[2px]" />
+                    )}
+                    <p
+                      className={`text-[10px] text-${!checkEmail? 'red' : 'green'}-600`}
+                    >
+                      {!checkEmail
+                        ? 'Email is not availble.'
+                        : 'Email is availble.'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
               <Input
                 id="email"
                 placeholder="Your email"
@@ -131,7 +184,25 @@ export function SignUpForm() {
               </div>
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="password">Confirm Password</Label>
+              <div className="flex space-x-2 relative">
+                <Label htmlFor="password">Confirm Password</Label>
+                {data.password && data.confirmPassword && (
+                  <div className="flex absolute left-28 top-1/2 -translate-y-1/2">
+                    {data.password !== data.confirmPassword ? (
+                      <IoIosClose className="text-red-600" />
+                    ) : (
+                      <IoCheckmarkOutline className="text-green-600 text-[14px] me-[2px] mb-[2px]" />
+                    )}
+                    <p
+                      className={`text-[10px] text-${data.password !== data.confirmPassword ? 'red' : 'green'}-600`}
+                    >
+                      {data.password !== data.confirmPassword
+                        ? 'Passwords do not match.'
+                        : 'Passwords match.'}
+                    </p>
+                  </div>
+                )}
+              </div>
               <div className="relative">
                 <Input
                   id="confirm password"
@@ -196,8 +267,8 @@ export function SignUpForm() {
         </Button>
         <Button
           className="w-[120px] cursor-pointer"
-          disabled={false}
-          onClick={(e) => handleSubmit(e)}
+          disabled={validationData()}
+          // onClick={(e) => handleSubmit(e)}
         >
           Create Account
         </Button>
