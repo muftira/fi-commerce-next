@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Asterisk from '@/components/asterisk';
+import Modal from '@/components/modal';
 
 // icons
 import { BiShowAlt, BiSolidHide } from 'react-icons/bi';
@@ -19,6 +21,7 @@ import { fetchData } from '@/utils/fetch';
 
 export function SignUpForm() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<Signup>({
     profilePicture: '',
     fullName: '',
@@ -27,7 +30,6 @@ export function SignUpForm() {
     confirmPassword: '',
     address: '',
     phoneNumber: '',
-    roleName: 'customer',
   });
 
   const [hidePassword, setHidePassword] = useState<PasswordHide>({
@@ -36,13 +38,30 @@ export function SignUpForm() {
   });
 
   const [checkEmail, setCheckEmail] = useState<boolean | string>('');
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const debounce = useDebounce(data.email, 1000);
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    delete data.confirmPassword;
-    // const response = await fetchData('POST', '/userregister', data);
+    const submitedData = {
+      fullName: data.fullName,
+      email: data.email,
+      password: data.password,
+      address: data.address,
+      phone: data.phoneNumber,
+      roleName: 'customer',
+      imageProfile: data.profilePicture,
+    };
+
+    const response = await fetchData('POST', 'v1/userregister', submitedData);
+
+    if (response.success) {
+      setIsModalOpen(true);
+    } else {
+      setIsModalOpen(false);
+    }
+
+    console.log('data==>', data);
   };
 
   const handleCheckEmail = async () => {
@@ -52,8 +71,6 @@ export function SignUpForm() {
     } else {
       setCheckEmail(false);
     }
-    console.log('response==>', response.data?.data);
-    console.log('email==>', data.email);
   };
 
   const validationData = () => {
@@ -64,11 +81,27 @@ export function SignUpForm() {
       data.address &&
       data.phoneNumber &&
       data.password === data.confirmPassword &&
-      checkEmail
+      checkEmail &&
+      data.password.length >= 5
     ) {
       return false;
     }
     return true;
+  };
+
+  const handleUploadPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setData((prev) => ({
+      ...prev,
+      profilePicture: e.target.files?.[0] ? URL.createObjectURL(e.target.files?.[0]) : '',
+    }));
+  };
+
+  const handleRemovePhoto = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setData((prev) => ({ ...prev, profilePicture: '' }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   useEffect(() => {
@@ -78,14 +111,14 @@ export function SignUpForm() {
   }, [data.email]);
 
   return (
-    <Card className="w-[700px] h-[640px]">
+    <Card className="w-[700px] h-[680px]">
       <CardHeader className="text-center">
         <CardTitle>Create Your Account</CardTitle>
       </CardHeader>
       <CardContent>
         <form>
           <div className="grid grid-flow-col grid-rows-2 w-full items-center gap-4">
-            <div className="flex flex-col h-[478px] justify-between space-y-1.5 row-span-6">
+            <div className="flex flex-col h-[520px] justify-between space-y-1.5 row-span-6">
               <Label htmlFor="fullName">Profile Picture</Label>
               <div className="flex justify-center items-center">
                 <Avatar className="w-[300px] h-[300px]">
@@ -99,14 +132,8 @@ export function SignUpForm() {
                   id="profilePicture"
                   placeholder="Your Avatar"
                   type="file"
-                  onChange={(e) =>
-                    setData((prev) => ({
-                      ...prev,
-                      profilePicture: e.target.files?.[0]
-                        ? URL.createObjectURL(e.target.files?.[0])
-                        : '',
-                    }))
-                  }
+                  ref={fileInputRef}
+                  onChange={(e) => handleUploadPhoto(e)}
                 />
                 <div className="flex justify-between gap-2">
                   <Button className="cursor-pointer w-[120px]">
@@ -115,12 +142,7 @@ export function SignUpForm() {
                   <Button
                     variant="outline"
                     className="text-red-600 hover:text-red-300 cursor-pointer w-[120px]"
-                    onClick={() =>
-                      setData((prev) => ({
-                        ...prev,
-                        profilePicture: '',
-                      }))
-                    }
+                    onClick={(e) => handleRemovePhoto(e)}
                   >
                     Delete Picture
                   </Button>
@@ -128,7 +150,10 @@ export function SignUpForm() {
               </div>
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="fullName">Full Name</Label>
+              <Label htmlFor="fullName">
+                Full Name
+                <Asterisk />{' '}
+              </Label>
               <Input
                 id="name"
                 placeholder="Your name"
@@ -137,7 +162,10 @@ export function SignUpForm() {
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
               <div className="flex space-x-2 relative">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">
+                  Email
+                  <Asterisk />
+                </Label>
                 {debounce && (
                   <div className="flex absolute left-8 top-1/2 -translate-y-1/2">
                     {!checkEmail ? (
@@ -160,7 +188,26 @@ export function SignUpForm() {
               />
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="password">Password</Label>
+              <div className="flex space-x-2 relative">
+                <Label htmlFor="password">
+                  Password
+                  <Asterisk />
+                </Label>
+                {data.password && (
+                  <div className="flex absolute left-[3.8rem] top-1/2 -translate-y-1/2">
+                    {data.password.length < 5 ? (
+                      <IoIosClose className="text-red-600" />
+                    ) : (
+                      <IoCheckmarkOutline className="text-green-600 text-[14px] me-[2px] mb-[2px]" />
+                    )}
+                    <p
+                      className={`text-[10px] text-${data.password.length < 5 ? 'red' : 'green'}-600`}
+                    >
+                      {data.password.length < 5 ? 'Passwords do not match.' : 'Passwords match.'}
+                    </p>
+                  </div>
+                )}
+              </div>
               <div className="relative">
                 <Input
                   id="password"
@@ -184,11 +231,15 @@ export function SignUpForm() {
                   />
                 )}
               </div>
+              <p className={`text-[10px]`}>*Password must be at least 5 characters long.</p>
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
               <div className="flex space-x-2 relative">
-                <Label htmlFor="password">Confirm Password</Label>
-                {data.password && data.confirmPassword && (
+                <Label htmlFor="password">
+                  Confirm Password
+                  <Asterisk />
+                </Label>
+                {data.confirmPassword && (
                   <div className="flex absolute left-28 top-1/2 -translate-y-1/2">
                     {data.password !== data.confirmPassword ? (
                       <IoIosClose className="text-red-600" />
@@ -236,9 +287,13 @@ export function SignUpForm() {
                   />
                 )}
               </div>
+              <p className={`text-[10px]`}>*Both password fields must be the same.</p>
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="phone">Phone Number</Label>
+              <Label htmlFor="phone">
+                Phone Number
+                <Asterisk />
+              </Label>
               <Input
                 id="phone"
                 placeholder="Your phone number"
@@ -247,7 +302,10 @@ export function SignUpForm() {
               />
             </div>
             <div className="flex flex-col space-y-1.5 col-span-2">
-              <Label htmlFor="address">Address</Label>
+              <Label htmlFor="address">
+                Address
+                <Asterisk />
+              </Label>
               <Textarea
                 id="address"
                 placeholder="Your address"
@@ -267,13 +325,14 @@ export function SignUpForm() {
         >
           Cancel
         </Button>
-        <Button
+
+        <Modal
           className="w-[120px] cursor-pointer"
-          disabled={validationData()}
-          // onClick={(e) => handleSubmit(e)}
-        >
-          Create Account
-        </Button>
+          isModalOpen={isModalOpen}
+          handleSubmit={handleSubmit}
+          validationData={validationData()}
+          onClick={() => router.push('/login')}
+        />
       </CardFooter>
     </Card>
   );

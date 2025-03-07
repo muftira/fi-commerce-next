@@ -10,18 +10,25 @@ export type Login = {
 };
 
 export type Signup = {
-  profilePicture: string;
+  profilePicture: any;
   fullName: string;
   email: string;
   password: string;
   confirmPassword?: string;
   address: string;
   phoneNumber: string;
-  roleName: string;
 };
 
 export type Header = {
   'Content-Type': string;
   Authorization?: string;
   AllowedOrigin: string;
+};
+
+export type ModalProps = {
+  className?: string;
+  isModalOpen: boolean;
+  handleSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  validationData: boolean;
+  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
 };
