@@ -1,7 +1,5 @@
-import React from 'react'
+import React from 'react';
 
 export default function Asterisk() {
-  return (
-    <span className="text-red-500">*</span>
-  )
+  return <span className="text-red-500">*</span>;
 }
