@@ -23,7 +23,7 @@ export function SignUpForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [data, setData] = useState<Signup>({
-    profilePicture: '',
+    profilePicture: null,
     fullName: '',
     email: '',
     password: '',
@@ -39,32 +39,37 @@ export function SignUpForm() {
 
   const [checkEmail, setCheckEmail] = useState<boolean | string>('');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isValidationPhoto, setIsValidationPhoto] = useState<boolean>(false);
+  const [isLoader, setIsLoader] = useState<boolean>(false);
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
 
-  const debounce = useDebounce(data.email, 1000);
+  const debounce: string = useDebounce(data.email, 1000);
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
-    const submitedData = {
-      fullName: data.fullName,
-      email: data.email,
-      password: data.password,
-      address: data.address,
-      phone: data.phoneNumber,
-      roleName: 'customer',
-      imageProfile: data.profilePicture,
-    };
+  const handleSubmit = async (): Promise<void> => {
+    setIsValidationPhoto(false);
+    setIsLoader(true);
+    const submitedData = new FormData();
+    submitedData.append('fullName', data.fullName);
+    submitedData.append('email', data.email);
+    submitedData.append('password', data.password);
+    submitedData.append('address', data.address);
+    submitedData.append('phone', data.phoneNumber);
+    submitedData.append('roleName', 'customer');
+    if (data.profilePicture instanceof File) {
+      submitedData.append('imageProfile', data.profilePicture);
+    }
 
-    const response = await fetchData('POST', 'v1/userregister', submitedData);
+    const response = await fetchData('POST', 'v1/userregister', submitedData, true);
 
     if (response.success) {
+      setIsLoader(false);
       setIsModalOpen(true);
     } else {
       setIsModalOpen(false);
     }
-
-    console.log('data==>', data);
   };
 
-  const handleCheckEmail = async () => {
+  const handleCheckEmail = async (): Promise<void> => {
     const response = await fetchData('GET', `v1/useremail?email=${data.email}`);
     if (response.success) {
       setCheckEmail(true);
@@ -73,7 +78,7 @@ export function SignUpForm() {
     }
   };
 
-  const validationData = () => {
+  const validationData = (): boolean => {
     if (
       data.fullName &&
       data.email &&
@@ -82,26 +87,43 @@ export function SignUpForm() {
       data.phoneNumber &&
       data.password === data.confirmPassword &&
       checkEmail &&
-      data.password.length >= 5
+      data.password.length >= 5 &&
+      !isLoader
     ) {
       return false;
     }
     return true;
   };
 
-  const handleUploadPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUploadPhoto = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (
+      file &&
+      file.type !== 'image/jpeg' &&
+      file.type !== 'image/png' &&
+      file.type !== 'image/jpg'
+    ) {
+      setIsValidationPhoto(true);
+      setIsModalOpen(true);
+      e.target.value = '';
+      return;
+    }
     setData((prev) => ({
       ...prev,
-      profilePicture: e.target.files?.[0] ? URL.createObjectURL(e.target.files?.[0]) : '',
+      profilePicture: file || null,
     }));
+    if (file) {
+      setImageUrl(URL.createObjectURL(file));
+    }
   };
 
-  const handleRemovePhoto = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleRemovePhoto = (e: React.MouseEvent<HTMLButtonElement>): void => {
     e.preventDefault();
-    setData((prev) => ({ ...prev, profilePicture: '' }));
+    setData((prev) => ({ ...prev, profilePicture: null }));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+    setImageUrl(undefined);
   };
 
   useEffect(() => {
@@ -122,7 +144,7 @@ export function SignUpForm() {
               <Label htmlFor="fullName">Profile Picture</Label>
               <div className="flex justify-center items-center">
                 <Avatar className="w-[300px] h-[300px]">
-                  <AvatarImage src={data.profilePicture} alt="ImageProfile" />
+                  <AvatarImage src={imageUrl} alt="ImageProfile" />
                   <AvatarFallback className="text-4xl">PP</AvatarFallback>
                 </Avatar>
               </div>
@@ -327,11 +349,23 @@ export function SignUpForm() {
         </Button>
 
         <Modal
-          className="w-[120px] cursor-pointer"
+          className="w-[140px] cursor-pointer"
           isModalOpen={isModalOpen}
           handleSubmit={handleSubmit}
           validationData={validationData()}
-          onClick={() => router.push('/login')}
+          onClick={() => (isValidationPhoto ? setIsModalOpen(false) : router.push('/login'))}
+          isLoader={isLoader}
+          text={
+            isValidationPhoto
+              ? {
+                  title: 'Invalid file type!',
+                  description: 'Please upload a JPG or JPEG or PNG image.',
+                }
+              : {
+                  title: 'Success!',
+                  description: 'Your account has been created. Please log in to continue.',
+                }
+          }
         />
       </CardFooter>
     </Card>

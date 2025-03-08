@@ -3,16 +3,21 @@ import { Login, Header } from '@/types';
 
 const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
-export async function fetchData(fetchType: string, constApiUrl: string, objData?: Login) {
+export async function fetchData<T>(
+  fetchType: string,
+  constApiUrl: string,
+  objData?: T,
+  formData: boolean = false
+) {
   let header: Header = {
-    'Content-Type': 'application/json',
+    'Content-Type': formData ? 'multipart/form-data' : 'application/json',
     AllowedOrigin: '*',
   };
   const fiCommerce = JSON.parse(localStorage.getItem('fiCommerce') ?? '{}');
 
   if (fiCommerce) {
     header = {
-      'Content-Type': 'application/json',
+      'Content-Type': formData ? 'multipart/form-data' : 'application/json',
       Authorization: `Bearer ${fiCommerce.token}`,
       AllowedOrigin: '*',
     };

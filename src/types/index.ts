@@ -10,7 +10,7 @@ export type Login = {
 };
 
 export type Signup = {
-  profilePicture: any;
+  profilePicture: File | null;
   fullName: string;
   email: string;
   password: string;
@@ -25,10 +25,12 @@ export type Header = {
   AllowedOrigin: string;
 };
 
-export type ModalProps = {
+export type ModalProps<T> = {
   className?: string;
-  isModalOpen: boolean;
-  handleSubmit: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  validationData: boolean;
-  onClick: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  isModalOpen?: boolean;
+  handleSubmit?: (e: T) => void;
+  validationData?: boolean;
+  onClick?: (e: T) => void;
+  isLoader?: boolean;
+  text?: { title: string; description: string };
 };
