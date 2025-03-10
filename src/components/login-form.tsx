@@ -138,7 +138,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               <div className="text-center text-sm">
                 Don&apos;t have an account?{' '}
                 <a
-                  onClick={() => router.push('/signup')}
+                  onClick={() => router.push('/auth/signup')}
                   className="underline underline-offset-4 cursor-pointer"
                 >
                   Sign up

@@ -353,7 +353,7 @@ export function SignUpForm() {
           isModalOpen={isModalOpen}
           handleSubmit={handleSubmit}
           validationData={validationData()}
-          onClick={() => (isValidationPhoto ? setIsModalOpen(false) : router.push('/login'))}
+          onClick={() => (isValidationPhoto ? setIsModalOpen(false) : router.push('/auth/login'))}
           isLoader={isLoader}
           text={
             isValidationPhoto
