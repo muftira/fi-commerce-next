@@ -34,7 +34,7 @@ export default function Modal<T>({
           disabled={validationData}
         >
           {isLoader ? <Loader2 className={`${isLoader && 'animate-spin'}`} /> : ''}
-          Create Account
+          Create
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white">

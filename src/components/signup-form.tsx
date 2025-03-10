@@ -133,17 +133,17 @@ export function SignUpForm() {
   }, [data.email]);
 
   return (
-    <Card className="w-[700px] h-[680px]">
+    <Card className="md:w-[700px] w-[300px] md:h-[680px]">
       <CardHeader className="text-center">
         <CardTitle>Create Your Account</CardTitle>
       </CardHeader>
       <CardContent>
         <form>
-          <div className="grid grid-flow-col grid-rows-2 w-full items-center gap-4">
-            <div className="flex flex-col h-[520px] justify-between space-y-1.5 row-span-6">
+          <div className="md:grid md:grid-flow-col md:grid-rows-2 flex flex-col w-full md:items-center gap-4">
+            <div className="flex flex-col md:h-[520px] justify-between space-y-1.5 row-span-6">
               <Label htmlFor="fullName">Profile Picture</Label>
               <div className="flex justify-center items-center">
-                <Avatar className="w-[300px] h-[300px]">
+                <Avatar className="md:w-[300px] md:h-[300px] w-[150px] h-[150px]">
                   <AvatarImage src={imageUrl} alt="ImageProfile" />
                   <AvatarFallback className="text-4xl">PP</AvatarFallback>
                 </Avatar>
@@ -349,7 +349,7 @@ export function SignUpForm() {
         </Button>
 
         <Modal
-          className="w-[140px] cursor-pointer"
+          className="w-[120px] cursor-pointer"
           isModalOpen={isModalOpen}
           handleSubmit={handleSubmit}
           validationData={validationData()}
