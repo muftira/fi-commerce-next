@@ -39,9 +39,13 @@ export default function CardWithForm() {
     }
   };
 
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     setIsLoader(true);
-    setIsModalOpen(true);
+    const response = await fetchData('POST', 'v1/forgotpassword', { email });
+    if (response.success) {
+      setIsLoader(false);
+      setIsModalOpen(true);
+    }
   };
 
   useEffect(() => {
@@ -74,7 +78,7 @@ export default function CardWithForm() {
                       <IoCheckmarkOutline className="text-green-600 text-[14px] me-[2px] mb-[2px]" />
                     )}
                     <p className={`text-[10px] text-${checkEmail ? 'red' : 'green'}-600`}>
-                      {checkEmail ? 'Email has not registered.' : 'Email has registered.'}
+                      {checkEmail ? 'Email has not been registered.' : 'Email has been registered.'}
                     </p>
                   </div>
                 )}

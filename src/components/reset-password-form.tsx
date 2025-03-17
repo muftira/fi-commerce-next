@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useDebounce } from '@/utils/hooks';
 import { fetchData } from '@/utils/fetch';
 import { ResetPassword, PasswordHide } from '@/types';
 import { useRouter } from 'next/router';
@@ -24,21 +23,19 @@ import { IoIosClose } from 'react-icons/io';
 import { IoCheckmarkOutline } from 'react-icons/io5';
 
 export default function CardWithForm() {
-  const [checkEmail, setCheckEmail] = useState<boolean>(false);
   const [data, setData] = useState<ResetPassword>({
     password: '',
     confirmPassword: '',
   });
   const router = useRouter();
+  const { token, email } = router.query;
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isLoader, setIsLoader] = useState<boolean>(false);
+  const [isValid, setIsValid] = useState<boolean>(false);
   const [hidePassword, setHidePassword] = useState<PasswordHide>({
     password: false,
     confirmPassword: false,
   });
-
-  const debouncePassword: string = useDebounce(data.password, 1000);
-  const debounceConfirmPassword: string = useDebounce(data.confirmPassword, 1000);
 
   const validationData = (): boolean => {
     if (data.password.length < 5) {
@@ -49,15 +46,29 @@ export default function CardWithForm() {
     }
     return false;
   };
-  const handleSubmit = (): void => {
+  const handleSubmit = async (): Promise<void> => {
     setIsLoader(true);
-    setIsModalOpen(true);
+    const submitedData = {
+      newPassword: data.password,
+      email: email,
+    };
+    const response = await fetchData('POST', `v1/resetpassword?token=${token}`, submitedData);
+
+    if (response.success) {
+      setIsValid(true);
+      setIsLoader(false);
+      setIsModalOpen(true);
+    } else {
+      setIsValid(false);
+      setIsLoader(false);
+      setIsModalOpen(true);
+    }
   };
 
   return (
     <Card className="w-[350px] md:w-[450px]">
       <CardHeader>
-        <CardTitle>Change password</CardTitle>
+        <CardTitle>New password</CardTitle>
         {/* <CardDescription>
           Please enter your email address to search for your account.
         </CardDescription> */}
@@ -172,12 +183,20 @@ export default function CardWithForm() {
           validationData={validationData()}
           onClick={() => router.push('/auth/login')}
           isLoader={isLoader}
-          text={{
-            title: 'Success!',
-            description:
-              'Password has been updated successfully. You can now login with your new password.',
-            button: 'Update password',
-          }}
+          text={
+            isValid
+              ? {
+                  title: 'Success!',
+                  description:
+                    'Password has been updated successfully. You can now login with your new password.',
+                  button: 'Update password',
+                }
+              : {
+                  title: 'oops!',
+                  description: 'Link has expired or is invalid.',
+                  button: 'Update password',
+                }
+          }
         />
       </CardFooter>
     </Card>
