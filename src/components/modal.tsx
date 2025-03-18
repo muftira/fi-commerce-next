@@ -34,13 +34,15 @@ export default function Modal<T>({
           disabled={validationData}
         >
           {isLoader ? <Loader2 className={`${isLoader && 'animate-spin'}`} /> : ''}
-          Create
+          {text?.button}
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="bg-white">
         <AlertDialogHeader>
           <AlertDialogTitle>{text?.title}</AlertDialogTitle>
-          <AlertDialogDescription>{text?.description}</AlertDialogDescription>
+          <AlertDialogDescription className="whitespace-pre-line">
+            {text?.description}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogAction onClick={(e) => onClick && onClick(e as unknown as T)}>

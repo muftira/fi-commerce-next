@@ -32,5 +32,10 @@ export type ModalProps<T> = {
   validationData?: boolean;
   onClick?: (e: T) => void;
   isLoader?: boolean;
-  text?: { title: string; description: string };
+  text?: { title: string; description: string; button: string };
+};
+
+export type ResetPassword = {
+  password: string;
+  confirmPassword: string;
 };

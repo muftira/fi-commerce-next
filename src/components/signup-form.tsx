@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { PasswordHide, Signup } from '@/types';
 import { useDebounce } from '@/utils/hooks';
+import { fetchData } from '@/utils/fetch';
 
 // components
 import { Button } from '@/components/ui/button';
@@ -17,7 +18,6 @@ import Modal from '@/components/modal';
 import { BiShowAlt, BiSolidHide } from 'react-icons/bi';
 import { IoIosClose } from 'react-icons/io';
 import { IoCheckmarkOutline } from 'react-icons/io5';
-import { fetchData } from '@/utils/fetch';
 
 export function SignUpForm() {
   const router = useRouter();
@@ -360,10 +360,12 @@ export function SignUpForm() {
               ? {
                   title: 'Invalid file type!',
                   description: 'Please upload a JPG or JPEG or PNG image.',
+                  button: 'Create',
                 }
               : {
                   title: 'Success!',
                   description: 'Your account has been created. Please log in to continue.',
+                  button: 'Create',
                 }
           }
         />
