@@ -39,3 +39,9 @@ export type ResetPassword = {
   password: string;
   confirmPassword: string;
 };
+
+export type UserLogin = {
+  name: string;
+  email: string;
+  profilePicture: string | null;
+};
